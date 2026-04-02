@@ -1,0 +1,10 @@
+# Python/Django
+venv/
+*.pyc
+__pycache__/
+db.sqlite3
+.env
+
+# Folders to ignore if they end up in the root
+node_modules/
+dist/
