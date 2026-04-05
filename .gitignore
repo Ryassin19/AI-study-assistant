@@ -8,3 +8,9 @@ db.sqlite3
 # Folders to ignore if they end up in the root
 node_modules/
 dist/
+
+# Frontend specific
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+.DS_Store
