@@ -15,13 +15,21 @@ client = OpenAI(
 @api_view(['POST'])
 def ask_ai(request):
     user_input = request.data.get('text', '')
+    mode = "summary"
+    mode = request.data.get('mode', '')
+    instruction = ("You are a specialized study assistant "
+    "that summerizes the notes of the students "
+    "and answers their questions")
+    
+    if(mode == "quiz"):
+        instruction = "give a quiz of 5 questions about the topic"
+    elif(mode == "eli5"):
+        instruction = "explain the topic like i am 5 years old"
     
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
-            {"role": "system", "content": "You are a specialized study assistant "
-            "that summerizes the notes of the students "
-            "and answers their questions"}, 
+            {"role": "system", "content": instruction}, 
             {"role": "user", "content": user_input} 
         ]
     )
