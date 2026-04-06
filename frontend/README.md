@@ -1,16 +1,46 @@
-# React + Vite
+# 🎓 AI Study Assistant
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack web application that uses Llama 3.3 to help students transform their notes into summaries, ELI5 explanations, or interactive quizzes.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Features
 
-## React Compiler
+- Multi-Mode Processing: Toggle between Summary, Quiz, and ELI5 (Explain Like I'm 5) modes.  
+- Real-time AI Integration: Powered by Groq API for lightning-fast responses.  
+- Markdown Support: Beautifully formatted AI responses.  
+- One-Click Copy: Easily move your generated notes to other documents.  
+- Responsive UI: Built with React for a smooth experience.  
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+**Frontend:** React, Axios, React-Markdown  
+**Backend:** Django, Django REST Framework  
+**AI:** Groq Cloud API (Llama-3.3-70B)  
+
+---
+
+## 🏁 Getting Started
+
+1. Clone the repository  
+
+2. Create a `.env` file and add your API key:
+   ```
+   API_KEY=your_groq_api_key
+   ```
+
+3. Start the backend:
+   ```
+   python manage.py runserver
+   ```
+
+4. Start the frontend:
+   ```
+   npm run dev
+   ```
+
+---
+
+Built as a full-stack AI project to explore real-time LLM applications.
