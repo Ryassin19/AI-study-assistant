@@ -5,6 +5,11 @@ from rest_framework.decorators import api_view
 import os
 from openai import OpenAI
 
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework import status
+from .models import StudyDocument
+
 # Create your views here.
  
 client = OpenAI(
@@ -36,3 +41,18 @@ def ask_ai(request):
     summary_text = response.choices[0].message.content
     return Response({"summary": summary_text})
 
+class DocumentUploadView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, *args, **kwargs):
+        file_obj = request.data.get('file')
+        title = request.data.get('title', file_obj.name)
+
+        doc = StudyDocument.objects.create(file=file_obj, title=title)
+        
+        return Response({
+            "message": "File uploaded successfully!",
+            "id": doc.id
+        }, status=status.HTTP_201_CREATED)
+    
+    

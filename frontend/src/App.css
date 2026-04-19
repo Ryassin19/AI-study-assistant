@@ -29,7 +29,7 @@ button {
   border: none; /* Removes the default gray border */
   font-weight: 600;
   cursor: pointer;
-  margin-top: 10px; /* This does the same job as your <br /> but with more control */
+  margin-top: 10px; 
 }
 
 button:hover {
@@ -54,13 +54,12 @@ button:hover {
   line-height: 1.6;
   margin-top: 30px;
   padding: 25px;
-  background: var(--social-bg); /* Uses the subtle background from index.css */
+  background: var(--social-bg); 
   border: 1px solid var(--border);
   border-radius: 12px;
   color: var(--text);
 }
 
-/* These styles make the Markdown parts look professional */
 .summary-container h3 {
   color: var(--accent);
   margin: 20px 0 10px 0;
