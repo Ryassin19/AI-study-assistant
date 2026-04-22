@@ -1,78 +1,39 @@
-.App {
-  /* This uses the width from index.css root */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
+/* Clean up the markdown text returned by the AI */
+.markdown-content {
+  line-height: 1.7;
+  font-size: 1.05rem;
 }
 
-textarea {
-  width: 100%;
-  min-height: 150px;
-  padding: 20px;
-  /* Use the variables from index.css! */
-  background: var(--code-bg); 
-  color: var(--text-h);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  font-family: var(--sans);
-  font-size: 16px;
-  margin-bottom: 20px;
-  box-sizing: border-box;
+.markdown-content p {
+  margin-bottom: 1.2rem;
 }
 
-button {
-  background-color: var(--accent) !important; /* The !important tells the browser "I really mean it" */
-  color: white;
-  padding: 10px 25px;
-  border-radius: 8px;
-  border: none; /* Removes the default gray border */
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 10px; 
+.markdown-content ul, .markdown-content ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.2rem;
 }
 
-button:hover {
-  opacity: 0.8;
+.markdown-content li {
+  margin-bottom: 0.5rem;
 }
 
-.summary-container {
-  text-align: left;
-  line-height: 1.6;
-  margin-top: 30px;
-  padding: 25px;
-  background: var(--social-bg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  color: var(--text);
-  width: 100%;
-  box-sizing: border-box;
+.markdown-content code {
+  background: var(--code-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--mono);
 }
 
-.summary-container {
-  text-align: left;
-  line-height: 1.6;
-  margin-top: 30px;
-  padding: 25px;
-  background: var(--social-bg); 
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  color: var(--text);
+/* Add a nice scrollbar for the dark mode */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.summary-container h3 {
-  color: var(--accent);
-  margin: 20px 0 10px 0;
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.summary-container ul, .summary-container ol {
-  padding-left: 20px;
-}
-
-.summary-container li {
-  margin-bottom: 10px;
-}
-
-.summary-container strong {
-  color: var(--text-h);
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
 }

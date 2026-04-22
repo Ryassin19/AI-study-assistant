@@ -50,17 +50,18 @@
   }
 }
 
-body {
+#root {
+  width: 100vw;       
+  height: 100vh;      
   margin: 0;
+  padding: 0;
+  display: flex;     
+  overflow: hidden;   
 }
 
-#root {
-  width: 100%; /* ✅ Let it take the full width available */
-  max-width: 800px; /* ✅ Keep the content centered and readable */
-  margin: 0 auto;
-  text-align: center;
-  padding: 20px;
-  box-sizing: border-box;
+body {
+  margin: 0;
+  padding: 0;
 }
 
 h1,

@@ -8,6 +8,10 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from .models import StudyDocument
 from django.shortcuts import get_object_or_404
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings 
 
 # Create your views here.
  
@@ -16,29 +20,47 @@ client = OpenAI(
         base_url="https://api.groq.com/openai/v1"
     )
 
-@api_view(['POST'])
-def ask_ai(request):
-    user_input = request.data.get('text', '')
-    mode = "summary"
-    mode = request.data.get('mode', '')
-    instruction = ("You are a specialized study assistant "
-    "that summerizes the notes of the students "
-    "and answers their questions")
-    
-    if(mode == "quiz"):
-        instruction = "give a quiz of 5 questions about the topic"
-    elif(mode == "eli5"):
-        instruction = "explain the topic like i am 5 years old"
-    
+def get_ai_response(instruction, user_input):
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
-            {"role": "system", "content": instruction}, 
-            {"role": "user", "content": user_input} 
+            {"role": "system", "content": instruction},
+            {"role": "user", "content": user_input}
         ]
     )
-    summary_text = response.choices[0].message.content
-    return Response({"summary": summary_text})
+    return response.choices[0].message.content
+
+embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+
+@api_view(['POST'])
+def ask_ai(request):
+    user_input = request.data.get('text', '')
+    doc_id = request.data.get('doc_id', None) 
+    mode = request.data.get('mode', 'summary')
+    
+    if doc_id:
+        vector_db = Chroma(
+            persist_directory="./chroma_db", 
+            embedding_function=embeddings,
+            collection_name=f"doc_{doc_id}"
+        )
+        
+        search_results = vector_db.similarity_search(user_input, k=3)
+        context = "\n\n".join([doc.page_content for doc in search_results])
+        
+        instruction = (
+            f"You are a study assistant. Use the following excerpts from a textbook "
+            f"to answer the student's question accurately: \n\n{context}"
+        )
+    
+    else:
+        instruction = "You are a general study assistant helping with student questions."
+        if mode == "quiz":
+            instruction = "Give a 5-question quiz based on the user's topic."
+        elif mode == "eli5":
+            instruction = "Explain the topic like I am 5 years old."
+    
+    return Response({"answer": get_ai_response(instruction, user_input)})
 
 class DocumentUploadView(APIView):
     parser_classes = (MultiPartParser, FormParser)
@@ -57,45 +79,41 @@ class DocumentUploadView(APIView):
         if not file_obj:
             return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
         
-        file_obj.seek(0)
-        file_bytes = file_obj.read()
-        file_obj.seek(0)
         doc = StudyDocument.objects.create(file=file_obj, title=title)
         extracted_text = ""
+        file_obj.seek(0)
 
-        try:
-            with fitz.open(stream=io.BytesIO(file_bytes), filetype="pdf") as pdf:
-                for page in pdf:
-                    extracted_text += page.get_text()
+        with fitz.open(stream=io.BytesIO(file_obj.read()), filetype="pdf") as pdf:
+            for page in pdf:
+                extracted_text += page.get_text()
 
-        except Exception as e:
-            return Response({"error": f"Failed to read PDF: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=100)
+        chunks = text_splitter.split_text(extracted_text)
 
-        mode = request.data.get('mode', '') or 'summary'
-        instruction = ("Summarize these lecture notes into key bullet points.")
-        
-        if(mode == "quiz"):
-            instruction = "give a quiz of 5 questions about the lecture notes"
-        elif(mode == "eli5"):
-            instruction = "explain the lecture notes like i am 5 years old"
-        
-        ai_response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {"role": "system", "content": instruction}, 
-                {"role": "user", "content": extracted_text[:10000]} 
-            ]
+        Chroma.from_texts(
+            texts=chunks,
+            embedding=embeddings, 
+            persist_directory="./chroma_db",
+            collection_name=f"doc_{doc.id}" 
         )
-        ai_content = ai_response.choices[0].message.content
-       
-        doc.summary = ai_content
+
+        total = len(chunks)
+        if total > 3:
+            sample = [chunks[0], chunks[total // 2], chunks[-1]]
+            summary_context = "\n\n".join(sample)
+        else:
+            summary_context = "\n\n".join(chunks)
+
+        instruction = "Briefly summarize the main purpose of these lecture notes in 3-5 bullet points."        
+        
+        doc.summary = get_ai_response(instruction, summary_context)
         doc.save()
 
         return Response({
             "message": "File uploaded successfully!",
             "summary": doc.summary,
             "id": doc.id
-        }, status=status.HTTP_201_CREATED)
+        }, status=201)
     
 class DocumentDetailView(APIView):
     def get(self, request, pk):
@@ -109,5 +127,13 @@ class DocumentDetailView(APIView):
 
     def delete(self, request, pk):
         doc = get_object_or_404(StudyDocument, pk=pk)
+        
+        vector_db = Chroma(
+            persist_directory="./chroma_db", 
+            embedding_function=embeddings,
+            collection_name=f"doc_{doc.id}"
+        )
+        vector_db.delete_collection()
+        
         doc.delete()
         return Response({"message": "Deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
