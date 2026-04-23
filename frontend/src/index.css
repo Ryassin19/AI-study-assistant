@@ -107,3 +107,17 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden; /* Prevents the 'double scrollbar' glitch */
+}
+
+#root {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+}
